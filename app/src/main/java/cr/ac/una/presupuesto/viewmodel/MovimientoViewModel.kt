@@ -8,41 +8,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import cr.ac.una.presupuesto.data.model.Movimiento
 import cr.ac.una.presupuesto.data.repository.MovimientoRepository
+import cr.ac.una.presupuesto.viewmodel.states.MovimientoUIState
 
-class MovimientoViewModel: ViewModel() {
+class MovimientoViewModel : ViewModel() {
     private val repo = MovimientoRepository()
     var listaMovimientos = mutableStateListOf<Movimiento>()
 
-    var showDialog by mutableStateOf(false)
-    var showDeleteConfirmDialog by mutableStateOf(false)
-    var showUpdateConfirmDialog by mutableStateOf(false)
-    var movimientoSeleccionado: Movimiento? by mutableStateOf(null)
+    var uiState by mutableStateOf(MovimientoUIState())
+        private set
+
     private var movimientoTemporal: Movimiento? = null
 
-    var monto by mutableStateOf("")
-    var tipo by mutableStateOf("")
-    var fecha by mutableStateOf("")
-
-    var montoError by mutableStateOf(false)
-    var tipoError by mutableStateOf(false)
-    var fechaError by mutableStateOf(false)
-
-    var imagenUri by mutableStateOf<Uri?>(null)
-
-    fun abrirDialog(movimiento: Movimiento? = null) {
-        limpiarFormulario()
-        movimientoSeleccionado = movimiento
-        if (movimiento != null) {
-            monto = movimiento.monto.toString()
-            tipo = movimiento.tipo
-            fecha = movimiento.fecha
-        }
-        showDialog = true
-    }
-
-    fun cerrarDialog() {
-        showDialog = false
-        limpiarFormulario()
+    init {
+        cargarMovimientos()
     }
 
     private fun cargarMovimientos() {
@@ -54,69 +32,109 @@ class MovimientoViewModel: ViewModel() {
         }
     }
 
-    init {
-        cargarMovimientos()
+    fun onMontoChange(monto: String) {
+        if (monto.all { char -> char.isDigit() || char == '.' }) {
+            uiState = uiState.copy(monto = monto, montoError = false)
+        }
+    }
+
+    fun onTipoChange(tipo: String) {
+        uiState = uiState.copy(tipo = tipo, tipoError = false)
+    }
+
+    fun onFechaChange(fecha: String) {
+        uiState = uiState.copy(fecha = fecha, fechaError = false)
+    }
+
+    fun onImagenUriChange(uri: Uri?) {
+        uiState = uiState.copy(imagenUri = uri)
+    }
+
+    fun abrirDialog(movimiento: Movimiento? = null) {
+        uiState = if (movimiento != null) {
+            MovimientoUIState(
+                showDialog = true,
+                movimientoSeleccionado = movimiento,
+                monto = movimiento.monto.toString(),
+                tipo = movimiento.tipo,
+                fecha = movimiento.fecha
+            )
+        } else {
+            MovimientoUIState(showDialog = true)
+        }
+    }
+
+    fun cerrarDialog() {
+        uiState = uiState.copy(showDialog = false)
+        limpiarFormulario()
     }
 
     fun confirmarEliminar(movimiento: Movimiento) {
-        movimientoSeleccionado = movimiento
-        showDeleteConfirmDialog = true
+        uiState = uiState.copy(
+            movimientoSeleccionado = movimiento,
+            showDeleteConfirmDialog = true
+        )
+    }
+
+    fun cancelarEliminar() {
+        uiState = uiState.copy(showDeleteConfirmDialog = false, movimientoSeleccionado = null)
     }
 
     fun eliminarConfirmado() {
-        movimientoSeleccionado?.let {
+        uiState.movimientoSeleccionado?.let {
             repo.eliminarMovimiento(it.id)
         }
-        showDeleteConfirmDialog = false
-        movimientoSeleccionado = null
+        uiState = uiState.copy(showDeleteConfirmDialog = false, movimientoSeleccionado = null)
     }
 
     private fun validarCampos(): Boolean {
-        montoError = monto.isBlank() || monto.toDoubleOrNull() == null
-        tipoError = tipo.isBlank()
-        fechaError = fecha.isBlank()
+        val montoErr = uiState.monto.isBlank() || uiState.monto.toDoubleOrNull() == null
+        val tipoErr = uiState.tipo.isBlank()
+        val fechaErr = uiState.fecha.isBlank()
 
-        return !montoError && !tipoError && !fechaError
+        uiState = uiState.copy(
+            montoError = montoErr,
+            tipoError = tipoErr,
+            fechaError = fechaErr
+        )
+
+        return !montoErr && !tipoErr && !fechaErr
     }
 
     fun guardarMovimiento() {
         if (validarCampos()) {
-            val movimiento = movimientoSeleccionado?.copy(
-                monto = monto.toDouble(),
-                tipo = tipo,
-                fecha = fecha
+            val movimiento = uiState.movimientoSeleccionado?.copy(
+                monto = uiState.monto.toDouble(),
+                tipo = uiState.tipo,
+                fecha = uiState.fecha
             ) ?: Movimiento(
-                monto = monto.toDouble(),
-                tipo = tipo,
-                fecha = fecha
+                monto = uiState.monto.toDouble(),
+                tipo = uiState.tipo,
+                fecha = uiState.fecha
             )
 
-            if (movimientoSeleccionado == null) {
-                repo.guardarMovimientoConImagen(movimiento, imagenUri)
-                cerrarDialog()
-            } else {
-                movimientoTemporal = movimiento
-                showUpdateConfirmDialog = true
-            }
+            // Usamos guardarMovimientoConImagen para ambos casos (nuevo y edición)
+            // Si imagenUri es null, simplemente guarda los datos de texto.
+            repo.guardarMovimientoConImagen(movimiento, uiState.imagenUri)
+            cerrarDialog()
         }
+    }
+
+    fun cancelarActualizar() {
+        uiState = uiState.copy(showUpdateConfirmDialog = false)
+        movimientoTemporal = null
     }
 
     fun actualizarConfirmado() {
         movimientoTemporal?.let {
-            repo.actualizarMovimiento(it)
+            repo.guardarMovimientoConImagen(it, uiState.imagenUri)
         }
-        showUpdateConfirmDialog = false
+        uiState = uiState.copy(showUpdateConfirmDialog = false)
         movimientoTemporal = null
         cerrarDialog()
     }
 
-    fun limpiarFormulario() {
-        monto = ""
-        tipo = ""
-        fecha = ""
-        montoError = false
-        tipoError = false
-        fechaError = false
-        movimientoSeleccionado = null
+    private fun limpiarFormulario() {
+        uiState = MovimientoUIState()
     }
 }
