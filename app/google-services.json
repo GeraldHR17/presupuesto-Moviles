@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "457411965515",
+    "firebase_url": "https://moviles-gerald-default-rtdb.firebaseio.com",
+    "project_id": "moviles-gerald",
+    "storage_bucket": "moviles-gerald.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:457411965515:android:743d3829434d66351913ce",
+        "android_client_info": {
+          "package_name": "cr.ac.una.presupuesto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBjEvIl6f6RyyUf2PcCEJbCJ1i9aEMZ00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
