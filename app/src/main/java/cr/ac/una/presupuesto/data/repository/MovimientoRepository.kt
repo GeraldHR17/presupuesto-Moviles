@@ -19,21 +19,22 @@ class MovimientoRepository {
         db.child(id).setValue(movimiento)
     }
 
-    fun guardarMovimientoConImagen(
-        movimiento: Movimiento,
-        imagenUri: Uri?
-    ) {
+    fun guardarMovimientoConImagen(movimiento: Movimiento, imagenUri: Uri?) {
         if (imagenUri != null) {
             val storage = FirebaseStorage.getInstance()
-            val nombreArchivo = "movimientos/${UUID.randomUUID()}.jpg"
-            val referencia = storage.reference.child(nombreArchivo)
+            val reference = storage.reference.child("movimientos/${UUID.randomUUID()}.jpg")
 
-            referencia.putFile(imagenUri).continueWithTask {
-                referencia.downloadUrl
+            // Guardamos temporalmente la URI local para que no viaje vacío si el upload tarda o falla
+            movimiento.imagenUrl = imagenUri.toString()
+
+            reference.putFile(imagenUri).continueWithTask { task ->
+                if (!task.isSuccessful) task.exception?.let { throw it }
+                reference.downloadUrl
             }.addOnSuccessListener { uri ->
                 movimiento.imagenUrl = uri.toString()
                 guardarMovimiento(movimiento)
             }.addOnFailureListener {
+                // Si el storage falla, guardamos el movimiento con la URI local string como fallback
                 guardarMovimiento(movimiento)
             }
         } else {

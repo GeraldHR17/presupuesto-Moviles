@@ -67,7 +67,7 @@ fun MovimientoScreen(
 @Composable
 fun ConfirmDeleteDialog(viewModel: MovimientoViewModel) {
     AlertDialog(
-        onDismissRequest = { viewModel.cancelarEliminar() },
+        onDismissRequest = { viewModel.cancelarAccion() },
         title = { Text("Confirmar eliminación") },
         text = { Text("¿Está seguro de que desea eliminar este registro?") },
         confirmButton = {
@@ -76,7 +76,7 @@ fun ConfirmDeleteDialog(viewModel: MovimientoViewModel) {
             }
         },
         dismissButton = {
-            TextButton(onClick = { viewModel.cancelarEliminar() }) {
+            TextButton(onClick = { viewModel.cancelarAccion() }) {
                 Text("Cancelar")
             }
         }
@@ -86,7 +86,7 @@ fun ConfirmDeleteDialog(viewModel: MovimientoViewModel) {
 @Composable
 fun ConfirmUpdateDialog(viewModel: MovimientoViewModel) {
     AlertDialog(
-        onDismissRequest = { viewModel.cancelarActualizar() },
+        onDismissRequest = { viewModel.cancelarAccion() },
         title = { Text("Confirmar actualización") },
         text = { Text("¿Está seguro de que desea actualizar este registro?") },
         confirmButton = {
@@ -95,7 +95,7 @@ fun ConfirmUpdateDialog(viewModel: MovimientoViewModel) {
             }
         },
         dismissButton = {
-            TextButton(onClick = { viewModel.cancelarActualizar() }) {
+            TextButton(onClick = { viewModel.cancelarAccion() }) {
                 Text("Cancelar")
             }
         }

@@ -51,12 +51,12 @@ fun MovimientoDialog(
     )
 
     var localUri by remember { mutableStateOf<Uri?>(null) }
-    
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            viewModel.onImagenUriChange(localUri)
+            viewModel.actualizarImagen(localUri)
         }
     }
 

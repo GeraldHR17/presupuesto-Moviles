@@ -17,8 +17,6 @@ class MovimientoViewModel : ViewModel() {
     var uiState by mutableStateOf(MovimientoUIState())
         private set
 
-    private var movimientoTemporal: Movimiento? = null
-
     init {
         cargarMovimientos()
     }
@@ -30,6 +28,11 @@ class MovimientoViewModel : ViewModel() {
                 addAll(lista)
             }
         }
+    }
+
+    // Función solicitada para actualizar la imagen en el estado
+    fun actualizarImagen(uri: Uri?) {
+        uiState = uiState.copy(imagenUri = uri)
     }
 
     fun onMontoChange(monto: String) {
@@ -44,10 +47,6 @@ class MovimientoViewModel : ViewModel() {
 
     fun onFechaChange(fecha: String) {
         uiState = uiState.copy(fecha = fecha, fechaError = false)
-    }
-
-    fun onImagenUriChange(uri: Uri?) {
-        uiState = uiState.copy(imagenUri = uri)
     }
 
     fun abrirDialog(movimiento: Movimiento? = null) {
@@ -70,20 +69,11 @@ class MovimientoViewModel : ViewModel() {
     }
 
     fun confirmarEliminar(movimiento: Movimiento) {
-        uiState = uiState.copy(
-            movimientoSeleccionado = movimiento,
-            showDeleteConfirmDialog = true
-        )
-    }
-
-    fun cancelarEliminar() {
-        uiState = uiState.copy(showDeleteConfirmDialog = false, movimientoSeleccionado = null)
+        uiState = uiState.copy(movimientoSeleccionado = movimiento, showDeleteConfirmDialog = true)
     }
 
     fun eliminarConfirmado() {
-        uiState.movimientoSeleccionado?.let {
-            repo.eliminarMovimiento(it.id)
-        }
+        uiState.movimientoSeleccionado?.let { repo.eliminarMovimiento(it.id) }
         uiState = uiState.copy(showDeleteConfirmDialog = false, movimientoSeleccionado = null)
     }
 
@@ -91,13 +81,7 @@ class MovimientoViewModel : ViewModel() {
         val montoErr = uiState.monto.isBlank() || uiState.monto.toDoubleOrNull() == null
         val tipoErr = uiState.tipo.isBlank()
         val fechaErr = uiState.fecha.isBlank()
-
-        uiState = uiState.copy(
-            montoError = montoErr,
-            tipoError = tipoErr,
-            fechaError = fechaErr
-        )
-
+        uiState = uiState.copy(montoError = montoErr, tipoError = tipoErr, fechaError = fechaErr)
         return !montoErr && !tipoErr && !fechaErr
     }
 
@@ -113,25 +97,20 @@ class MovimientoViewModel : ViewModel() {
                 fecha = uiState.fecha
             )
 
-            // Usamos guardarMovimientoConImagen para ambos casos (nuevo y edición)
-            // Si imagenUri es null, simplemente guarda los datos de texto.
+            // Si hay una nueva imagenUri, el repo se encarga de subirla
+            // Si no, guarda el movimiento con la imagenUrl que ya tenía (o vacía)
             repo.guardarMovimientoConImagen(movimiento, uiState.imagenUri)
             cerrarDialog()
         }
     }
 
-    fun cancelarActualizar() {
+    fun actualizarConfirmado() {
+        guardarMovimiento() // Reutilizamos la lógica de guardado que maneja edición
         uiState = uiState.copy(showUpdateConfirmDialog = false)
-        movimientoTemporal = null
     }
 
-    fun actualizarConfirmado() {
-        movimientoTemporal?.let {
-            repo.guardarMovimientoConImagen(it, uiState.imagenUri)
-        }
-        uiState = uiState.copy(showUpdateConfirmDialog = false)
-        movimientoTemporal = null
-        cerrarDialog()
+    fun cancelarAccion() {
+        uiState = uiState.copy(showUpdateConfirmDialog = false, showDeleteConfirmDialog = false)
     }
 
     private fun limpiarFormulario() {
