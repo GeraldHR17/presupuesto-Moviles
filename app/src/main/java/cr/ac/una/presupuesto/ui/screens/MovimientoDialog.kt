@@ -60,15 +60,7 @@ fun MovimientoDialog(
         }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) {
-            val uri = crearUriImage(context)
-            localUri = uri
-            cameraLauncher.launch(uri)
-        }
-    }
+
 
     AlertDialog(
         onDismissRequest = { viewModel.cerrarDialog() },
@@ -172,7 +164,9 @@ fun MovimientoDialog(
 
                 Button(
                     onClick = {
-                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                        val uri = crearUriImage(context)
+                        localUri = uri
+                        cameraLauncher.launch(uri)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)

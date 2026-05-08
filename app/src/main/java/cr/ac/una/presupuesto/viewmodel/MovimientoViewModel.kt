@@ -1,16 +1,19 @@
 package cr.ac.una.presupuesto.viewmodel
 
+import android.app.Application
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import cr.ac.una.presupuesto.data.model.Movimiento
 import cr.ac.una.presupuesto.data.repository.MovimientoRepository
+import cr.ac.una.presupuesto.util.LocationHelper
 import cr.ac.una.presupuesto.viewmodel.states.MovimientoUIState
 
-class MovimientoViewModel : ViewModel() {
+class MovimientoViewModel (application: Application) : AndroidViewModel(application) {
     private val repo = MovimientoRepository()
     var listaMovimientos = mutableStateListOf<Movimiento>()
 
@@ -87,20 +90,26 @@ class MovimientoViewModel : ViewModel() {
 
     fun guardarMovimiento() {
         if (validarCampos()) {
-            val movimiento = uiState.movimientoSeleccionado?.copy(
-                monto = uiState.monto.toDouble(),
-                tipo = uiState.tipo,
-                fecha = uiState.fecha
-            ) ?: Movimiento(
-                monto = uiState.monto.toDouble(),
-                tipo = uiState.tipo,
-                fecha = uiState.fecha
-            )
+            LocationHelper.obtenerUbicacion(getApplication()){lat, lng->
+                val movimiento = uiState.movimientoSeleccionado?.copy(
+                    monto = uiState.monto.toDouble(),
+                    tipo = uiState.tipo,
+                    fecha = uiState.fecha,
+                    latitud = lat,
+                    longitud = lng
+                ) ?: Movimiento(
+                    monto = uiState.monto.toDouble(),
+                    tipo = uiState.tipo,
+                    fecha = uiState.fecha,
+                    latitud = lat,
+                    longitud = lng
+                )
 
-            // Si hay una nueva imagenUri, el repo se encarga de subirla
-            // Si no, guarda el movimiento con la imagenUrl que ya tenía (o vacía)
-            repo.guardarMovimientoConImagen(movimiento, uiState.imagenUri)
-            cerrarDialog()
+                // Si hay una nueva imagenUri, el repo se encarga de subirla
+                // Si no, guarda el movimiento con la imagenUrl que ya tenía (o vacía)
+                repo.guardarMovimientoConImagen(movimiento, uiState.imagenUri)
+                cerrarDialog()
+            }
         }
     }
 
@@ -112,6 +121,20 @@ class MovimientoViewModel : ViewModel() {
     fun cancelarAccion() {
         uiState = uiState.copy(showUpdateConfirmDialog = false, showDeleteConfirmDialog = false)
     }
+
+
+    val balanceTotal: Double
+        get() {
+            val ingresos = listaMovimientos
+                .filter { it.tipo == "Ingreso" }
+                .sumOf { it.monto }
+
+            val egresos = listaMovimientos
+                .filter { it.tipo == "Egreso" }
+                .sumOf { it.monto }
+
+            return ingresos - egresos
+        }
 
     private fun limpiarFormulario() {
         uiState = MovimientoUIState()

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import cr.ac.una.presupuesto.ui.components.MovimientoCard
 import cr.ac.una.presupuesto.viewmodel.MovimientoViewModel
+import cr.ac.una.presupuesto.ui.components.BalanceCard
 
 @Composable
 fun MovimientoScreen(
@@ -40,6 +41,9 @@ fun MovimientoScreen(
                 .padding(padding)
         ) {
             LazyColumn {
+                item {
+                    BalanceCard(balance = viewModel.balanceTotal)
+                }
                 items(viewModel.listaMovimientos) { mov ->
                     MovimientoCard(
                         movimiento = mov,
