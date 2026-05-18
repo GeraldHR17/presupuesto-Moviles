@@ -31,4 +31,5 @@ object RetrofitInstance {
             .build()
             .create(WikipediaApiService::class.java)
     }
+    var prueba = ""
 }
