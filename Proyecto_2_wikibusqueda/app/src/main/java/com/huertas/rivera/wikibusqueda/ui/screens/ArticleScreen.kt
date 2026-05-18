@@ -58,7 +58,7 @@ fun ArticleScreen(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
-                        text = "Crónica de Wikipedia",
+                        text = "Artículo de Wikipedia",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onSurface

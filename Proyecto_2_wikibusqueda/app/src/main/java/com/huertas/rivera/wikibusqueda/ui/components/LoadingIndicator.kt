@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun LoadingIndicator() {
+    /* // MEDIEVAL
     val infiniteTransition = rememberInfiniteTransition(label = "dragon_loader")
-    
     val angle by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
@@ -30,6 +30,7 @@ fun LoadingIndicator() {
         ),
         label = "rotation"
     )
+    */
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -38,11 +39,13 @@ fun LoadingIndicator() {
     ) {
         Box(contentAlignment = Alignment.Center) {
             CircularProgressIndicator(
-                modifier = Modifier.size(80.dp),
+                modifier = Modifier.size(40.dp), // NORMAL
+                // modifier = Modifier.size(80.dp), // MEDIEVAL
                 color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 4.dp
             )
             
+            /* // MEDIEVAL
             Icon(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = null,
@@ -51,23 +54,23 @@ fun LoadingIndicator() {
                     .rotate(angle),
                 tint = MaterialTheme.colorScheme.tertiary
             )
+            */
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Invocando al Dragón de la Sabiduría...",
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            text = "Buscando artículos...", // NORMAL
+            // text = "Invocando al Dragón de la Sabiduría...", // MEDIEVAL
+            style = MaterialTheme.typography.bodyMedium
         )
         
+        /* // MEDIEVAL
         Text(
             text = "Consultando los antiguos pergaminos",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
         )
+        */
     }
 }

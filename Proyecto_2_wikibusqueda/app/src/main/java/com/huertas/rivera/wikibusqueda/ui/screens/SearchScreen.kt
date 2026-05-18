@@ -1,22 +1,16 @@
 package com.huertas.rivera.wikibusqueda.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.huertas.rivera.wikibusqueda.ui.components.ArticleList
 import com.huertas.rivera.wikibusqueda.ui.components.EmptyState
 import com.huertas.rivera.wikibusqueda.ui.components.LoadingIndicator
@@ -49,13 +43,13 @@ fun SearchScreen(
 
             uiState.error != null -> {
                 EmptyState(
-                    message = uiState.error ?: "Ocurrió un error inesperado",
+                    message = uiState.error ?: "Error al cargar datos",
                     isError = true
                 )
             }
 
             uiState.articles.isEmpty() && uiState.searchQuery.isNotBlank() -> {
-                EmptyState(message = "No se encontraron resultados para \"${uiState.searchQuery}\"")
+                EmptyState(message = "No se hallaron resultados para \"${uiState.searchQuery}\"")
             }
 
             else -> {
@@ -70,7 +64,6 @@ fun SearchScreen(
         }
     }
 
-    // Ventanilla de Inspección Medieval (Bottom Sheet)
     if (uiState.selectedArticleForPreview != null) {
         val article = uiState.selectedArticleForPreview!!
         val cleanExcerpt = article.excerpt?.replace(Regex("<[^>]*>"), "") ?: ""
@@ -88,44 +81,28 @@ fun SearchScreen(
                     .padding(bottom = 32.dp)
             ) {
                 Text(
-                    text = "Inspeccionando Pergamino",
+                    text = "Vista previa del artículo",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val imageUrl = article.thumbnail?.url?.let {
-                        if (it.startsWith("//")) "https:$it" else it
-                    }
-
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .border(2.dp, MaterialTheme.colorScheme.primary),
-                        contentScale = ContentScale.Crop
+                Column {
+                    Text(
+                        text = article.title,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                     )
-
-                    Column(modifier = Modifier.padding(start = 16.dp)) {
-                        Text(
-                            text = article.title,
-                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
-                        )
-                        Text(
-                            text = article.description ?: "Crónica antigua",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic)
-                        )
-                    }
+                    Text(
+                        text = article.description ?: "Información de Wikipedia",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = cleanExcerpt.ifBlank { "El contenido de este pergamino es un misterio hasta que se abra por completo..." },
+                    text = cleanExcerpt.ifBlank { "No hay un extracto disponible para este artículo." },
                     style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp)
                 )
 
@@ -139,12 +116,11 @@ fun SearchScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Leer Crónica Completa")
+                    Text("Leer artículo completo")
                 }
             }
         }
     }
 }
 
-// Nota: Importamos KnightIron manualmente para el scrimColor
 val KnightIron = androidx.compose.ui.graphics.Color(0xFF3E3C3A)
