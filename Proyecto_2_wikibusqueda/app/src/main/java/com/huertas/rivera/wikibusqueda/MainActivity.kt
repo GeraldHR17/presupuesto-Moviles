@@ -7,27 +7,36 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.Coil
+import com.huertas.rivera.wikibusqueda.data.remote.RetrofitInstance
 import com.huertas.rivera.wikibusqueda.navigation.AppNavigation
 import com.huertas.rivera.wikibusqueda.ui.theme.WikibusquedaTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), ImageLoaderFactory {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
+        
+        // Configuramos Coil globalmente para usar nuestro cliente con User-Agent
+        Coil.setImageLoader(newImageLoader())
 
         setContent {
-
             WikibusquedaTheme {
-
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
                     AppNavigation()
                 }
             }
         }
+    }
+
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader.Builder(this)
+            .okHttpClient(RetrofitInstance.okHttpClient)
+            .build()
     }
 }

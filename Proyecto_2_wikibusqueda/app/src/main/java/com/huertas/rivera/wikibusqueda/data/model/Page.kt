@@ -5,5 +5,6 @@ data class Page(
     val key: String,
     val title: String,
     val description: String?,
-    val thumbnail: Thumbnail?
+    val thumbnail: Thumbnail?,
+    val excerpt: String? // El fragmento del artículo para la previsualización
 )

@@ -13,7 +13,8 @@ object RetrofitInstance {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    private val client = OkHttpClient.Builder()
+    // Lo hacemos público para que Coil pueda usar el mismo cliente con el User-Agent
+    val okHttpClient: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(logging)
         .addInterceptor(Interceptor { chain ->
             val request = chain.request().newBuilder()
@@ -26,10 +27,9 @@ object RetrofitInstance {
     val api: WikipediaApiService by lazy {
         Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
-            .client(client)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(WikipediaApiService::class.java)
     }
-    var prueba = ""
 }

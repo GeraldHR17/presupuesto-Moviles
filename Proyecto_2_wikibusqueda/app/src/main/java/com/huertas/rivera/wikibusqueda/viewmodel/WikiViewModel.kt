@@ -2,6 +2,7 @@ package com.huertas.rivera.wikibusqueda.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.huertas.rivera.wikibusqueda.data.model.Page
 import com.huertas.rivera.wikibusqueda.data.repository.WikipediaRepository
 import com.huertas.rivera.wikibusqueda.viewmodel.states.WikiUiState
 import kotlinx.coroutines.Job
@@ -24,7 +25,6 @@ class WikiViewModel : ViewModel() {
     fun onQueryChange(newQuery: String) {
         _uiState.update { it.copy(searchQuery = newQuery) }
         
-        // Cancelamos el trabajo anterior si el usuario sigue escribiendo
         searchJob?.cancel()
         
         if (newQuery.isBlank()) {
@@ -32,7 +32,6 @@ class WikiViewModel : ViewModel() {
             return
         }
 
-        // Implementamos un pequeño delay (debounce) para no llamar a la API por cada letra
         searchJob = viewModelScope.launch {
             delay(500) 
             searchArticles(newQuery)
@@ -58,5 +57,13 @@ class WikiViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    fun showPreview(article: Page) {
+        _uiState.update { it.copy(selectedArticleForPreview = article) }
+    }
+
+    fun dismissPreview() {
+        _uiState.update { it.copy(selectedArticleForPreview = null) }
     }
 }

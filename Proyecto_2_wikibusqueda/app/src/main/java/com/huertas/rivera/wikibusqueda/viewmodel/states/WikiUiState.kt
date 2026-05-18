@@ -6,5 +6,6 @@ data class WikiUiState(
     val searchQuery: String = "",
     val articles: List<Page> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val selectedArticleForPreview: Page? = null // Para la previsualización mística
 )
